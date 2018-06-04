@@ -1,0 +1,37 @@
+{% extends "main_layout.html" %}
+{% block title %}Bmail{% endblock %}
+{% block content %}
+
+<div class="container">
+  <h1 class="text-center mt-3">Izbrisana spročila</h1>
+  <div class="row">
+
+    {% for message in deleted_messages %}
+      <div class="col-12 mt-3">
+        <div class="card">
+
+          <h5 class="card-header">
+            {% if current_user.key == message.receiver.get().key %}
+              Od: <span class="card-subtitle text-muted">{{message.sender.get().name}}</span><small class="float-right text-success">Prejeto: {{message.created_at.strftime('%d-%m-%Y %H:%M')}}</small>
+            {% else %}
+              Za: <span class="card-subtitle text-muted">{{message.receiver.get().name}}</span><small class="float-right text-info">Poslano: {{message.created_at.strftime('%d-%m-%Y %H:%M')}}</small>
+            {% endif %}
+          </h5>
+          <h5 class="card-header">
+            {% if current_user.key == message.receiver.get().key %}
+              Email: <span class="card-subtitle text-muted">{{message.sender.get().email}}
+            {% else %}
+              Email: <span class="card-subtitle text-muted">{{message.receiver.get().email}}
+            {% endif %}
+          </h5>
+
+          <div class="card-body">
+            <h6 class="card-subtitle mb-2 text-muted">Sporočilo:</h6>
+            <p class="card-text">{{message.message}}</p><p class="card-text"><small class="text-muted">{{message.created_at.strftime('%d-%m-%Y %H:%M')}}</small></p>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

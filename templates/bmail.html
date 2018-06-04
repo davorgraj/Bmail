@@ -1,0 +1,59 @@
+{% extends "main_layout.html" %}
+{% block title %}Bmail{% endblock %}
+{% block content %}
+<div class="container">
+  {% if notification %}
+    <div class="alert alert-{{alert_type}}" role="alert">
+      {{notification}}
+    </div>
+  {% endif %}
+  <h1 class="text-center mt-3">Sporočila</h1>
+  <div class="row">
+    {% for message in messages %}
+      <div class="col-12 mt-3">
+        <div class="card">
+
+          <h5 class="card-header">
+            {% if current_user.key == message.receiver.get().key %}
+              Od: <span class="card-subtitle text-muted">{{message.sender.get().name}}</span><small class="float-right text-success">Prejeto: {{message.created_at.strftime('%d-%m-%Y %H:%M')}}</small>
+            {% else %}
+              Za: <span class="card-subtitle text-muted">{{message.receiver.get().name}}</span><small class="float-right text-info">Poslano: {{message.created_at.strftime('%d-%m-%Y %H:%M')}}</small>
+            {% endif %}
+          </h5>
+          <h5 class="card-header">
+            {% if current_user.key == message.receiver.get().key %}
+              Email: <span class="card-subtitle text-muted">{{message.sender.get().email}}
+            {% else %}
+              Email: <span class="card-subtitle text-muted">{{message.receiver.get().email}}
+            {% endif %}
+          </h5>
+
+          <div class="card-body">
+            <h6 class="card-subtitle mb-2 text-muted">Sporočilo:</h6>
+            <p class="card-text">{{message.message}}</p>
+            <a href="" data-toggle="modal" data-target="#1" class="badge badge-danger">Izbriši</a>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="1" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">Ali res želite izbrisati sporočilo?</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form action="/deleted_messages/{{message.key.id()}}" method="post">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Prekliči</button>
+                <button type="submit" class="btn btn-primary">Izbriši</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

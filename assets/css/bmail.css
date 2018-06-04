@@ -1,0 +1,24 @@
+.top {
+  background-color: #8484844f;
+}
+nav a {
+  color: #007bff;
+}
+nav a:hover {
+  color: #0069d9;
+}
+nav img {
+  width: 100px;
+}
+nav i {
+  font-size: 40px;
+}
+
+.side-nav a {
+  font-size: 20px;
+  padding-bottom: 5px;
+}
+
+side-nav a, .badge {
+  font-weight: 300;
+}
