@@ -211,6 +211,7 @@ class DeletedMessagesHandler(BaseHandler):
                 Messages.receiver == self.current_user().key,
             )
         ).fetch()
+        
         params = {"deleted_messages": deleted_messages}
         return self.render_template("deleted_messages.html", params=params)
 
