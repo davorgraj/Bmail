@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import os
 import jinja2
 import webapp2
@@ -63,7 +64,7 @@ class BaseHandler(webapp2.RequestHandler):
         return self.session_store.get_session()
 
     def get_password_hash(self, password):
-        return hmac.new(bytearray('bmail' + password, "utf-8")).hexdigest()
+        return hmac.new(bytearray("bmail" + password, "utf-8")).hexdigest()
 
     def current_user(self):
         user_id = self.session.get("current_user")
@@ -75,6 +76,10 @@ class BaseHandler(webapp2.RequestHandler):
 
 class BmailHandler(BaseHandler):
     def get(self):
+
+        if not self.current_user():
+            return self.redirect_to("login")
+
         messages = Messages.query(
             Messages.deleted == False,
             ndb.OR(
@@ -105,7 +110,7 @@ class BmailHandler(BaseHandler):
             receiver=receiver.key
         ).put()
         params = {
-            "notification": "Uspesno poslano " + receiver_mail,
+            "notification": "Uspešno poslano za " + receiver_mail,
             "alert_type": "success"
         }
         return self.render_template("bmail.html", params=params)
@@ -132,7 +137,7 @@ class LoginHandler(BaseHandler):
             return self.redirect_to("home")
 
         params = {
-            "notification": "Uporabnisko ime ali geslo ni pravilno",
+            "notification": "Uporabniško ime ali geslo ni pravilno",
             "alert_type": "danger"
         }
         return self.render_accsess_template("login.html", params=params)
@@ -152,14 +157,14 @@ class SignUpHandler(BaseHandler):
         user = Users.query(Users.email == email).get()
         if user:
             params = {
-                "notification": "Uporabnik " + user.email + " ze obstaja.",
+                "notification": "Uporabnik " + user.email + " že obstaja.",
                 "alert_type": "danger"
             }
             return self.render_accsess_template("sign_up.html", params=params)
 
         Users(email=email, password=password, name=name).put()
         params = {
-            "notification": "Uspesno registrirani",
+            "notification": "Uspešno registrirani",
             "alert_type": "success"
         }
         return self.redirect_to("login", params=params)
@@ -211,7 +216,7 @@ class DeletedMessagesHandler(BaseHandler):
                 Messages.receiver == self.current_user().key,
             )
         ).fetch()
-        
+
         params = {"deleted_messages": deleted_messages}
         return self.render_template("deleted_messages.html", params=params)
 
