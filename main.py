@@ -76,7 +76,6 @@ class BaseHandler(webapp2.RequestHandler):
 
 class BmailHandler(BaseHandler):
     def get(self):
-
         if not self.current_user():
             return self.redirect_to("login")
 
@@ -102,7 +101,7 @@ class BmailHandler(BaseHandler):
             }
             return self.render_template("bmail.html", params=params)
 
-        if not receiver == self.current_user().email:
+        if receiver_mail == self.current_user().email:
             params = {
                 "notification": "Sebi ne morete poslati sporočila !!!",
                 "alert_type": "danger"
@@ -241,6 +240,12 @@ class DeletedMessagesHandler(BaseHandler):
         params = {"deleted_messages": deleted_messages}
         return self.render_template("deleted_messages.html", params=params)
 
+class UsersHandler(BaseHandler):
+    def get(self):
+        users = Users.query().fetch()
+        params = {"users": users}
+        return self.render_template("users.html", params=params)
+
 
 config = {}
 config['webapp2_extras.sessions'] = {
@@ -257,4 +262,5 @@ app = webapp2.WSGIApplication([
     webapp2.Route('/sender_delete/<message_id:\d+>', SenderDeleteHandler),
     webapp2.Route('/receiver_delete/<message_id:\d+>', ReceiverDeleteHandler),
     webapp2.Route('/deleted_messages', DeletedMessagesHandler),
+    webapp2.Route('/users', UsersHandler),
 ], debug=True, config=config)
