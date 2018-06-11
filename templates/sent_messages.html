@@ -26,12 +26,12 @@
 
           <div class="card-body">
             <h6 class="card-subtitle mb-2 text-muted">Sporočilo:</h6>
-            <p class="card-text"></p>{{message.message}}</p>
-            <a href="" data-toggle="modal" data-target="#1" class="badge badge-danger">Izbriši</a>
+            <p class="card-text">{{message.message}}</p>
+            <a href="" data-toggle="modal" data-target="#{{message.key.id()}}" class="badge badge-danger">Izbriši</a>
           </div>
         </div>
       </div>
-      <div class="modal fade" id="1" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal fade" id="{{message.key.id()}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="dialog">
           <div class="modal-content">
             <div class="modal-header">
@@ -40,12 +40,21 @@
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
+
             <div class="modal-body">
-              <form method="post" action="/deleted_messages/{{message.key.id()}}">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Prekliči</button>
-                <button type="submit" class="btn btn-primary">Izbriši</button>
-              </form>
+              {% if current_user.key == message.sender.get().key %}
+                <form action="/sender_delete/{{message.key.id()}}" method="post">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Prekliči</button>
+                  <button type="submit" class="btn btn-primary">Izbriši</button>
+                </form>
+              {% else %}
+                <form action="/receiver_delete/{{message.key.id()}}" method="post">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Prekliči</button>
+                  <button type="submit" class="btn btn-primary">Izbriši</button>
+                </form>
+              {% endif %}
             </div>
+            
           </div>
         </div>
       </div>

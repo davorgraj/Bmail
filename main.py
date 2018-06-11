@@ -81,7 +81,6 @@ class BmailHandler(BaseHandler):
             return self.redirect_to("login")
 
         messages = Messages.query(
-            Messages.deleted == False,
             ndb.OR(
                 Messages.sender == self.current_user().key,
                 Messages.receiver == self.current_user().key,
@@ -89,6 +88,7 @@ class BmailHandler(BaseHandler):
         ).fetch()
 
         params = {"messages": messages}
+
         return self.render_template("bmail.html", params=params)
 
     def post(self):
@@ -102,6 +102,13 @@ class BmailHandler(BaseHandler):
             }
             return self.render_template("bmail.html", params=params)
 
+        if not receiver == self.current_user().email:
+            params = {
+                "notification": "Sebi ne morete poslati sporočila !!!",
+                "alert_type": "danger"
+            }
+            return self.render_template("bmail.html", params=params)
+
         message = self.request.get("message")
 
         Messages(
@@ -109,6 +116,7 @@ class BmailHandler(BaseHandler):
             sender=self.current_user().key,
             receiver=receiver.key
         ).put()
+
         params = {
             "notification": "Uspešno poslano za " + receiver_mail,
             "alert_type": "success"
@@ -178,10 +186,11 @@ class LogoutHandler(BaseHandler):
 
 class SentMessagesHandler(BaseHandler):
     def get(self):
-        messages = Messages.query(
-            Messages.deleted == False,
-            Messages.sender == self.current_user().key
-        ).fetch()
+        if self.current_user().key == Messages.sender:
+            messages = Messages.query(
+                Messages.sender_delete == False,
+                Messages.sender == self.current_user().key,
+            ).fetch()
 
         params = {"messages": messages}
         return self.render_template("sent_messages.html", params=params)
@@ -189,28 +198,40 @@ class SentMessagesHandler(BaseHandler):
 
 class ReceivedMessagesHandler(BaseHandler):
     def get(self):
-        messages = Messages.query(
-            Messages.deleted == False,
-            Messages.receiver == self.current_user().key
-        ).fetch()
+        if self.current_user().key == Messages.receiver:
+            messages = Messages.query(
+                Messages.receiver_delete == False,
+                Messages.receiver == self.current_user().key
+            ).fetch()
 
         params = {"messages": messages}
         return self.render_template("received_messages.html", params=params)
 
 
-class MessageDeleteHandler(BaseHandler):
+class SenderDeleteHandler(BaseHandler):
     def post(self, message_id):
-        message_delete = Messages.get_by_id(int(message_id))
-        message_delete.key.delete()
-        message_delete.deleted = True
-        message_delete.put()
+        if Messages.sender == self.current_user().key:
+            message_delete = Messages.get_by_id(int(message_id))
+            message_delete.key.delete()
+            message_delete.sender_delete = True
+            message_delete.put()
+        return self.redirect_to("home")
+
+
+class ReceiverDeleteHandler(BaseHandler):
+    def post(self, message_id):
+        if Messages.receiver == self.current_user().key:
+            message_delete = Messages.get_by_id(int(message_id))
+            message_delete.key.delete()
+            message_delete.receiver_delete = True
+            message_delete.put()
+
         return self.redirect_to("home")
 
 
 class DeletedMessagesHandler(BaseHandler):
     def get(self):
         deleted_messages = Messages.query(
-            Messages.deleted == True,
             ndb.OR(
                 Messages.sender == self.current_user().key,
                 Messages.receiver == self.current_user().key,
@@ -233,6 +254,7 @@ app = webapp2.WSGIApplication([
     webapp2.Route('/logout', LogoutHandler),
     webapp2.Route('/sent_messages', SentMessagesHandler),
     webapp2.Route('/received_messages', ReceivedMessagesHandler),
-    webapp2.Route('/deleted_messages/<message_id:\d+>', MessageDeleteHandler),
+    webapp2.Route('/sender_delete/<message_id:\d+>', SenderDeleteHandler),
+    webapp2.Route('/receiver_delete/<message_id:\d+>', ReceiverDeleteHandler),
     webapp2.Route('/deleted_messages', DeletedMessagesHandler),
 ], debug=True, config=config)
