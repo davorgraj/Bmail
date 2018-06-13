@@ -214,6 +214,7 @@ class SenderDeleteHandler(BaseHandler):
             message_delete.key.delete()
             message_delete.sender_delete = True
             message_delete.put()
+
         return self.redirect_to("home")
 
 

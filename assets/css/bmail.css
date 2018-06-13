@@ -22,3 +22,16 @@ nav i {
 side-nav a, .badge {
   font-weight: 300;
 }
+
+@media screen and (max-width: 768px) {
+  .side-nav {
+    text-align: center;
+  }
+  h1 {
+    font-size: 32px;
+  }
+  h4 {
+    padding-top: 10px;
+    font-size: 20px;
+  }
+}
